@@ -1,5 +1,5 @@
 export const test = (request, response) => {
-    request.json({
+    response.json({
         message: 'route is working'
     });
 };
