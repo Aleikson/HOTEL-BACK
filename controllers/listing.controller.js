@@ -56,3 +56,55 @@ export const getListing = async (request, response, next) => {
         next(error);
     }
 };
+
+export const getAllListing = async (request, response, next) => {
+    try {
+        const limit = parseInt(request.query.limit) || 9;
+        const startIndex = parseInt(request.query.startIndex) || 0;
+
+        let offer = request.query.offer;
+
+        if (offer === undefined || offer === 'false') {
+            offer = { $in: [false, true] };
+        }
+
+        let furnished = request.query.furnished;
+
+        if (furnished === undefined || furnished === 'false') {
+            furnished = { $in: [false, true] };
+        }
+
+        let parking = request.query.parking;
+
+        if (parking === undefined || parking === 'false') {
+            parking = { $in: [false, true] };
+        }
+
+        let type = request.query.type;
+
+        if (type === undefined || type === 'all') {
+            type = { $in: ['sale', 'rent'] };
+        }
+
+        const searchTerm = request.query.searchTerm || '';
+
+        const sort = request.query.sort || 'createdAt';
+
+        const order = request.query.order || 'desc';
+
+        const listings = await Listing.find({
+            name: { $regex: searchTerm, $options: 'i' },
+            offer,
+            furnished,
+            parking,
+            type,
+        })
+            .sort({ [sort]: order })
+            .limit(limit)
+            .skip(startIndex);
+
+        return response.status(200).json(listings);
+    } catch (error) {
+        next(error);
+    }
+};
